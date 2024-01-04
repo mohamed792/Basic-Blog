@@ -37,6 +37,7 @@ public class PostServiceImp implements PostService {
         return null;
     }
 
+    @Transactional
     @Override
     public boolean deleteById(long id) {
         Post post = postRepository.findById(id).orElse(null);
@@ -54,8 +55,11 @@ public class PostServiceImp implements PostService {
     }
 
     @Override
+    @Transactional
     public PostDto update(PostDto postDto) {
-        return null;
+        getById(postDto.getId());
+        Post dbpost =postRepository.save(postMapper.postDtoToPost(postDto));
+        return  postMapper.postToPostDto(dbpost);
     }
 
     @Override

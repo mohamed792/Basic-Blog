@@ -50,4 +50,16 @@ public class PostController {
         boolean deleted = postService.deleteById(id);
         return new ResponseEntity<>("Deleted",HttpStatus.NO_CONTENT);
     }
+
+
+
+    @PutMapping("/")
+    public ResponseEntity<PostDto> updatePost(@Valid @RequestBody PostDto postDto){
+        PostDto dbPost = postService.update(postDto);
+        return  new ResponseEntity<>(dbPost,HttpStatus.ACCEPTED);
+
+    }
+
+
+
 }

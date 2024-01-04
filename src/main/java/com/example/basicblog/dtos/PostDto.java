@@ -13,11 +13,11 @@ public class PostDto {
     @NotBlank
     private String title;
 
-    @NotNull
+    @NotNull(message = "description should not be null or empty")
     @Size(min = 10,max = 30,message = "Size of description Should be between 10 and 30 .")
     private String description;
 
-    @NotBlank
+    @NotBlank(message = "content should not be null or empty")
     @Size(min = 10,max = 1000,message = "Size of content Should be between 10 and 30 .")
     private String content;
 
