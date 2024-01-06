@@ -6,6 +6,8 @@ import com.example.basicblog.exceptions.ResourceNotFoundException;
 import com.example.basicblog.mappers.PostMapper;
 import com.example.basicblog.repositories.PostRepository;
 import com.example.basicblog.services.PostService;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
 import jakarta.transaction.Transactional;
 import org.hibernate.ObjectNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,12 +21,15 @@ public class PostServiceImp implements PostService {
 
     private final PostRepository postRepository;
     private final PostMapper postMapper;
+    private final EntityManagerFactory emf;
 
     @Autowired
-    public PostServiceImp(PostRepository postRepository, PostMapper postMapper) {
+    public PostServiceImp(PostRepository postRepository, PostMapper postMapper, EntityManagerFactory emf) {
         this.postRepository = postRepository;
         this.postMapper = postMapper;
+        this.emf = emf;
     }
+
 
     @Transactional
     @Override
@@ -41,8 +46,8 @@ public class PostServiceImp implements PostService {
     @Override
     public boolean deleteById(long id) {
         Post post = postRepository.findById(id).orElse(null);
-        if(post == null)
-            throw new ResourceNotFoundException(Post.class.getSimpleName(),"id",String.valueOf(id));
+        if (post == null)
+            throw new ResourceNotFoundException(Post.class.getSimpleName(), "id", String.valueOf(id));
         postRepository.deleteById(id);
         return true;
     }
@@ -57,16 +62,28 @@ public class PostServiceImp implements PostService {
     @Override
     @Transactional
     public PostDto update(PostDto postDto) {
-        getById(postDto.getId());
-        Post dbpost =postRepository.save(postMapper.postDtoToPost(postDto));
-        return  postMapper.postToPostDto(dbpost);
+// we used EM to get last updated version of post to returned
+        EntityManager em = emf.createEntityManager();
+        Post dbPost = em.find(Post.class, postDto.getId());
+        Post toSave = postMapper.postDtoToPost(postDto);
+        Post saved = em.merge(toSave);
+        em.refresh(saved);
+        System.out.println(saved);
+        em.close();
+        return postMapper.postToPostDto(saved);
+        // implement using jpa repo
+//        getById(postDto.getId());
+//        Post dbpost = postRepository.saveAndFlush(postMapper.postDtoToPost(postDto));
+//
+//        System.out.println( getById(postDto.getId()));
+//        return postMapper.postToPostDto(dbpost);
     }
 
     @Override
     public PostDto getById(long id) {
         Post post = postRepository.findById(id).orElse(null);
         if (post == null)
-            throw new ResourceNotFoundException(Post.class.getSimpleName(),"id",String.valueOf(id));
+            throw new ResourceNotFoundException(Post.class.getSimpleName(), "id", String.valueOf(id));
         return postMapper.postToPostDto(post);
     }
 

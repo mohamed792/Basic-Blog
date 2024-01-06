@@ -8,6 +8,8 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
+import java.io.IOException;
+import java.sql.SQLException;
 import java.util.List;
 
 @ControllerAdvice
@@ -26,10 +28,10 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ApiError> handleMethodArgumentNotValidException(MethodArgumentNotValidException exception) {
-        String message = exception.getBindingResult().getFieldErrors()
+        List<String> message = exception.getBindingResult().getFieldErrors()
                 .stream()
-                .map(FieldError::getDefaultMessage).toList().toString();
-        ApiError apiError = new ApiError(HttpStatus.BAD_REQUEST, message);
+                .map(FieldError::getDefaultMessage).toList();
+        ApiError apiError = new ApiError(HttpStatus.BAD_REQUEST, message.toString());
         ResponseEntity<ApiError> responseEntity = ResponseEntity.badRequest().body(apiError);
         return responseEntity;
     }
@@ -43,5 +45,12 @@ public class GlobalExceptionHandler {
         return responseEntity;
     }
 
+    @ExceptionHandler(SQLException.class)
+    public ResponseEntity<ApiError> handleIOExceptions(SQLException exception) {
+
+        ApiError apiError = new ApiError(HttpStatus.BAD_REQUEST, exception.getMessage());
+        ResponseEntity<ApiError> responseEntity = ResponseEntity.badRequest().body(apiError);
+        return responseEntity;
+    }
 
 }

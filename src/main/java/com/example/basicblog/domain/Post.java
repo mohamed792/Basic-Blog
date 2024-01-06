@@ -3,6 +3,7 @@ package com.example.basicblog.domain;
 import jakarta.persistence.*;
 import jdk.jfr.Enabled;
 
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 @Entity
@@ -18,6 +19,12 @@ private String title;
 private String description;
 @Column(name = "content")
 private String content;
+
+@Column(name = "creation_date",updatable = false)
+private LocalDateTime creationDate;
+
+@Column(name = "update_date")
+private LocalDateTime lastUpdate;
 
 
 
@@ -52,6 +59,34 @@ private String content;
 
     public void setContent(String content) {
         this.content = content;
+    }
+
+    public LocalDateTime getCreationDate() {
+        return creationDate;
+    }
+
+    public void setCreationDate(LocalDateTime creationDate) {
+        this.creationDate = creationDate;
+    }
+
+    public LocalDateTime getLastUpdate() {
+        return lastUpdate;
+    }
+
+    public void setLastUpdate(LocalDateTime lastUpdate) {
+        this.lastUpdate = lastUpdate;
+    }
+
+    @Override
+    public String toString() {
+        return "Post{" +
+                "id=" + id +
+                ", title='" + title + '\'' +
+                ", description='" + description + '\'' +
+                ", content='" + content + '\'' +
+                ", creationDate=" + creationDate +
+                ", lastUpdate=" + lastUpdate +
+                '}';
     }
 
     @Override

@@ -4,6 +4,7 @@ import com.example.basicblog.domain.Post;
 import com.example.basicblog.dtos.PostDto;
 import com.example.basicblog.exceptions.WrongMethodArgsExceptions;
 import com.example.basicblog.services.PostService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.aspectj.util.LangUtil;
 import org.springframework.http.HttpHeaders;
@@ -11,7 +12,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.RequestContextUtils;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 
@@ -36,8 +39,10 @@ public class PostController {
 
 
     @PostMapping("")
-    public ResponseEntity<PostDto> addPost(@Valid @RequestBody PostDto postDto) {
+    public ResponseEntity<PostDto> addPost(@Valid @RequestBody PostDto postDto, HttpServletRequest request) {
 
+        System.out.println(RequestContextUtils.getTimeZone(request));
+        postDto.setCreationDate(LocalDateTime.now());
         PostDto savedPost = postService.add(postDto);
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.add("Location", "/api/v1/posts/" + savedPost.getId());
@@ -55,6 +60,8 @@ public class PostController {
 
     @PutMapping("/")
     public ResponseEntity<PostDto> updatePost(@Valid @RequestBody PostDto postDto){
+
+        postDto.setLastUpdate(LocalDateTime.now());
         PostDto dbPost = postService.update(postDto);
         return  new ResponseEntity<>(dbPost,HttpStatus.ACCEPTED);
 
