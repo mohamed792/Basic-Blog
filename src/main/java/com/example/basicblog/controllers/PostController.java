@@ -7,6 +7,10 @@ import com.example.basicblog.services.PostService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.aspectj.util.LangUtil;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,7 +18,10 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.RequestContextUtils;
 
+import java.lang.reflect.Field;
 import java.time.LocalDateTime;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
 
@@ -53,20 +60,33 @@ public class PostController {
     public ResponseEntity<String> deletePost(@PathVariable("id") long id) {
 
         boolean deleted = postService.deleteById(id);
-        return new ResponseEntity<>("Deleted",HttpStatus.NO_CONTENT);
+        return new ResponseEntity<>("Deleted", HttpStatus.NO_CONTENT);
     }
-
 
 
     @PutMapping("/")
-    public ResponseEntity<PostDto> updatePost(@Valid @RequestBody PostDto postDto){
+    public ResponseEntity<PostDto> updatePost(@Valid @RequestBody PostDto postDto) {
 
         postDto.setLastUpdate(LocalDateTime.now());
         PostDto dbPost = postService.update(postDto);
-        return  new ResponseEntity<>(dbPost,HttpStatus.ACCEPTED);
+        return new ResponseEntity<>(dbPost, HttpStatus.ACCEPTED);
 
     }
 
+    @GetMapping(path = "/")
+    public ResponseEntity<Page<PostDto>> getPostsByPage(
+            @RequestParam(defaultValue = "0", name = "page") int page,
+            @RequestParam(defaultValue = "20", name = "size") int size,
+            @RequestParam(defaultValue = "id", name = "sort") String sort) {
+
+        boolean isSearchable = Arrays.stream(Post.class.getDeclaredFields()).map(Field::getName).toList().contains(sort);
+        if(!isSearchable)
+            throw  new RuntimeException("The search value ("+sort+") not allowed");
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by(sort));
+        Page<PostDto> posts = postService.getByPage(pageable);
+        return new ResponseEntity<>(posts, HttpStatus.OK);
+    }
 
 
 }

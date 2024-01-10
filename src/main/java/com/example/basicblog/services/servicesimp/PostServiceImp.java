@@ -11,6 +11,8 @@ import jakarta.persistence.EntityManagerFactory;
 import jakarta.transaction.Transactional;
 import org.hibernate.ObjectNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -92,4 +94,14 @@ public class PostServiceImp implements PostService {
         List<PostDto> dbPostDto = postRepository.findAll().stream().map(postMapper::postToPostDto).toList();
         return dbPostDto;
     }
+
+    @Override
+    public Page<PostDto> getByPage(Pageable page) {
+
+        Page<PostDto> posts = postRepository.findAll(page).map(postMapper::postToPostDto);
+
+        return posts;
+    }
+
+
 }
