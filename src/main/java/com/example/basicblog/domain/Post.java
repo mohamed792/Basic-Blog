@@ -26,6 +26,9 @@ private LocalDateTime creationDate;
 @Column(name = "update_date")
 private LocalDateTime lastUpdate;
 
+@ManyToOne
+@JoinColumn(name = "user_id",referencedColumnName = "id")
+private User user;
 
 
 
