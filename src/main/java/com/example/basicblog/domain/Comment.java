@@ -20,13 +20,33 @@ public class Comment {
     @NotNull
     private String content;
     @Column(name = "published")
-    @NotNull
-    private LocalDateTime publishedAt;
+    @NotNull    private LocalDateTime publishedAt;
+
     @ManyToOne
-    @JoinColumn(name = "ueer_id", referencedColumnName = "id")
+    @JoinColumn(name = "userId", referencedColumnName = "id")
     private User user;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "postId", referencedColumnName = "id")
+    private Post post;
+
     public Comment() {
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
+
+    public Post getPost() {
+        return post;
+    }
+
+    public void setPost(Post post) {
+        this.post = post;
     }
 
     public long getId() {

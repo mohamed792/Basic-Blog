@@ -2,10 +2,12 @@ package com.example.basicblog.controllers;
 
 import com.example.basicblog.domain.Post;
 import com.example.basicblog.dtos.PostDto;
+import com.example.basicblog.dtos.PostWithUserIdDto;
 import com.example.basicblog.exceptions.WrongMethodArgsExceptions;
 import com.example.basicblog.services.PostService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
+import org.apache.coyote.Response;
 import org.aspectj.util.LangUtil;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -26,7 +28,7 @@ import java.util.Optional;
 
 
 @RestController
-@RequestMapping("/api/v1/posts")
+@RequestMapping("/api/v1")
 public class PostController {
 
     private final PostService postService;
@@ -36,7 +38,7 @@ public class PostController {
     }
 
 
-    @GetMapping("/{id}")
+    @GetMapping("/posts/{id}")
     public ResponseEntity<PostDto> getPostById(@PathVariable(value = "id") Optional<Long> id) {
 
         long pathId = id.orElseThrow(() -> new WrongMethodArgsExceptions(Post.class.getName(), "id", id.get().toString()));
@@ -44,8 +46,14 @@ public class PostController {
         return new ResponseEntity<>(postDto, HttpStatus.OK);
     }
 
+    @GetMapping("/posts/user")
+    public ResponseEntity<List<PostWithUserIdDto>> getAllPostsWithUserId() {
+        List<PostWithUserIdDto> posts = postService.getPostsWithUserID();
+        return new ResponseEntity<>(posts, HttpStatus.OK);
 
-    @PostMapping("")
+    }
+
+    @PostMapping("/posts")
     public ResponseEntity<PostDto> addPost(@Valid @RequestBody PostDto postDto, HttpServletRequest request) {
 
         System.out.println(RequestContextUtils.getTimeZone(request));
@@ -56,7 +64,7 @@ public class PostController {
         return new ResponseEntity<>(savedPost, httpHeaders, HttpStatus.CREATED);
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/posts/{id}")
     public ResponseEntity<String> deletePost(@PathVariable("id") long id) {
 
         boolean deleted = postService.deleteById(id);
@@ -64,7 +72,7 @@ public class PostController {
     }
 
 
-    @PutMapping("/")
+    @PutMapping("/posts/")
     public ResponseEntity<PostDto> updatePost(@Valid @RequestBody PostDto postDto) {
 
         postDto.setLastUpdate(LocalDateTime.now());
@@ -73,15 +81,15 @@ public class PostController {
 
     }
 
-    @GetMapping(path = "/")
+    @GetMapping(path = "/posts/")
     public ResponseEntity<Page<PostDto>> getPostsByPage(
             @RequestParam(defaultValue = "0", name = "page") int page,
             @RequestParam(defaultValue = "20", name = "size") int size,
             @RequestParam(defaultValue = "id", name = "sort") String sort) {
 
         boolean isSearchable = Arrays.stream(Post.class.getDeclaredFields()).map(Field::getName).toList().contains(sort);
-        if(!isSearchable)
-            throw  new RuntimeException("The search value ("+sort+") not allowed");
+        if (!isSearchable)
+            throw new RuntimeException("The search value (" + sort + ") not allowed");
 
         Pageable pageable = PageRequest.of(page, size, Sort.by(sort));
         Page<PostDto> posts = postService.getByPage(pageable);

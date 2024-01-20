@@ -1,6 +1,7 @@
 package com.example.basicblog.services;
 
 import com.example.basicblog.dtos.PostDto;
+import com.example.basicblog.dtos.PostWithUserIdDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -15,6 +16,7 @@ public interface PostService {
     public  PostDto update(PostDto postDto);
     public PostDto getById(long id);
     public List<PostDto> getAll();
+    public List<PostWithUserIdDto> getPostsWithUserID();
 
     public Page<PostDto> getByPage(Pageable page);
 

@@ -4,33 +4,38 @@ import jakarta.persistence.*;
 import jdk.jfr.Enabled;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Objects;
 
 @Entity
-@Table(name = "posts" ,uniqueConstraints = {@UniqueConstraint(columnNames = {"title"})})
+@Table(name = "posts", uniqueConstraints = {@UniqueConstraint(columnNames = {"title"})})
 public class Post {
 
-@Id
-@GeneratedValue(strategy = GenerationType.IDENTITY)
-private long id;
-@Column(name = "title")
-private String title;
-@Column(name = "description")
-private String description;
-@Column(name = "content")
-private String content;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private long id;
+    @Column(name = "title")
+    private String title;
+    @Column(name = "description")
+    private String description;
+    @Column(name = "content")
+    private String content;
 
-@Column(name = "creation_date",updatable = false)
-private LocalDateTime creationDate;
+    @Column(name = "creation_date", updatable = false)
+    private LocalDateTime creationDate;
 
-@Column(name = "update_date")
-private LocalDateTime lastUpdate;
+    @Column(name = "update_date")
+    private LocalDateTime lastUpdate;
 
-@ManyToOne
-@JoinColumn(name = "user_id",referencedColumnName = "id")
-private User user;
+    @ManyToOne
+    @JoinColumn(name = "user_id", referencedColumnName = "id")
+    private User user;
 
+    @OneToMany(mappedBy = "post", orphanRemoval = true, cascade = CascadeType.ALL)
+    private List<Comment> comments;
 
+    public Post() {
+    }
 
     public long getId() {
         return id;
@@ -80,6 +85,22 @@ private User user;
         this.lastUpdate = lastUpdate;
     }
 
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
+
+    public List<Comment> getComments() {
+        return comments;
+    }
+
+    public void setComments(List<Comment> comments) {
+        this.comments = comments;
+    }
+
     @Override
     public String toString() {
         return "Post{" +
@@ -89,6 +110,7 @@ private User user;
                 ", content='" + content + '\'' +
                 ", creationDate=" + creationDate +
                 ", lastUpdate=" + lastUpdate +
+                ", user=" + user +
                 '}';
     }
 
